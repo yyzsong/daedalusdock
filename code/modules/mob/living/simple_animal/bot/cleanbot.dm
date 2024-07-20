@@ -41,15 +41,14 @@
 	var/static/list/officers_titles = list(
 		JOB_CAPTAIN,
 		JOB_HEAD_OF_PERSONNEL,
-		JOB_HEAD_OF_SECURITY,
-		JOB_RESEARCH_DIRECTOR,
+		JOB_SECURITY_MARSHAL,
 	)
 	var/static/list/command_titles = list(
 		JOB_CAPTAIN = "Cpt.",
 		JOB_HEAD_OF_PERSONNEL = "Lt.",
 	)
 	var/static/list/security_titles = list(
-		JOB_HEAD_OF_SECURITY = "Maj.",
+		JOB_SECURITY_MARSHAL = "Maj.",
 		JOB_WARDEN = "Sgt.",
 		JOB_DETECTIVE = "Det.",
 		JOB_SECURITY_OFFICER = "Officer",
@@ -60,15 +59,9 @@
 		JOB_ATMOSPHERIC_TECHNICIAN = "Technician",
 	)
 	var/static/list/medical_titles = list(
-		JOB_CHIEF_MEDICAL_OFFICER = "C.M.O.",
+		JOB_MEDICAL_DIRECTOR = "C.M.O.",
 		JOB_MEDICAL_DOCTOR = "M.D.",
 		JOB_CHEMIST = "Pharm.D.",
-	)
-	var/static/list/research_titles = list(
-		JOB_RESEARCH_DIRECTOR = "Ph.D.",
-		JOB_ROBOTICIST = "M.S.",
-		JOB_SCIENTIST = "B.S.",
-		JOB_GENETICIST = "Gene B.S.",
 	)
 	var/static/list/legal_titles = list(
 		JOB_LAWYER = "Esq.",
@@ -82,7 +75,6 @@
 	)
 	///What ranks are suffixes to the name.
 	var/static/list/suffixes = list(
-		research_titles,
 		medical_titles,
 		legal_titles,
 	)
@@ -120,9 +112,6 @@
 	if(!weapon)
 		return
 	. += "[span_warning("Is that \a [weapon] taped to it...?")]"
-
-	if(ascended && user.stat == CONSCIOUS && user.client)
-		user.client.give_award(/datum/award/achievement/misc/cleanboss, user)
 
 /mob/living/simple_animal/bot/cleanbot/update_icon_state()
 	. = ..()
@@ -267,7 +256,7 @@
 				return
 
 		if(target && path.len == 0 && (get_dist(src,target) > 1))
-			path = get_path_to(src, target, max_distance=30, mintargetdist=1, id=access_card)
+			path = jps_path_to(src, target, max_distance=30, mintargetdist=1, access = access_card?.GetAccess())
 			mode = BOT_MOVING
 			if(length(path) == 0)
 				add_to_ignore(target)
@@ -308,7 +297,7 @@
 		target_types += list(
 			/obj/effect/decal/cleanable/xenoblood,
 			/obj/effect/decal/cleanable/blood,
-			/obj/effect/decal/cleanable/trail_holder,
+			/obj/effect/decal/cleanable/blood/trail_holder,
 		)
 
 	if(janitor_mode_flags & CLEANBOT_CLEAN_PESTS)
@@ -333,7 +322,7 @@
 	if(HAS_TRAIT(src, TRAIT_HANDS_BLOCKED))
 		return
 	. = ..()
-	if(ismopable(attack_target))
+	if(ismopable(attack_target) || istype(attack_target, /obj/effect/decal/cleanable/blood))
 		mode = BOT_CLEANING
 		update_icon_state()
 		var/turf/T = get_turf(attack_target)
@@ -349,6 +338,7 @@
 		playsound(src, 'sound/effects/spray2.ogg', 50, TRUE, -6)
 		attack_target.acid_act(75, 10)
 		target = null
+
 	else if(istype(attack_target, /mob/living/basic/cockroach) || ismouse(attack_target))
 		var/mob/living/living_target = attack_target
 		if(!living_target.stat)
@@ -389,7 +379,7 @@
 					current_floor.MakeSlippery(TURF_WET_WATER, min_wet_time = 20 SECONDS, wet_time_to_add = 15 SECONDS)
 			else
 				visible_message(span_danger("[src] whirs and bubbles violently, before releasing a plume of froth!"))
-				new /obj/effect/particle_effect/foam(loc)
+				new /obj/effect/particle_effect/fluid/foam(loc)
 
 /mob/living/simple_animal/bot/cleanbot/explode()
 	var/atom/drop_loc = drop_location()

@@ -360,17 +360,6 @@
 		if (isnull(.[cached_path]))
 			. -= cached_path
 
-
-/**
- * Removes any null entries from the list
- * Returns TRUE if the list had nulls, FALSE otherwise
-**/
-/proc/list_clear_nulls(list/list_to_clear)
-	var/start_len = list_to_clear.len
-	var/list/new_list = new(start_len)
-	list_to_clear -= new_list
-	return list_to_clear.len < start_len
-
 /*
  * Returns list containing all the entries from first list that are not present in second.
  * If skiprep = 1, repeated elements are treated as one.
@@ -421,7 +410,7 @@
 			list_to_pick[item] = 0
 		total += list_to_pick[item]
 
-	total = rand(0, total)
+	total = rand(1, total)
 	for(item in list_to_pick)
 		total -= list_to_pick[item]
 		if(total <= 0 && list_to_pick[item])
@@ -598,14 +587,6 @@
 			i++
 	return i
 
-/// Returns datum/data/record
-/proc/find_record(field, value, list/inserted_list)
-	for(var/datum/data/record/record_to_check in inserted_list)
-		if(record_to_check.fields[field] == value)
-			return record_to_check
-	return null
-
-
 /**
  * Move a single element from position from_index within a list, to position to_index
  * All elements in the range [1,to_index) before the move will be before the pivot afterwards
@@ -701,12 +682,6 @@
 			continue
 		if(checked_datum.vars[varname] == value)
 			return checked_datum
-
-///remove all nulls from a list
-/proc/remove_nulls_from_list(list/inserted_list)
-	while(inserted_list.Remove(null))
-		continue
-	return inserted_list
 
 ///Copies a list, and all lists inside it recusively
 ///Does not copy any other reference type

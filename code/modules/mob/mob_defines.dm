@@ -11,7 +11,6 @@
 	layer = MOB_LAYER
 	plane = GAME_PLANE
 	animate_movement = SLIDE_STEPS
-	hud_possible = list(ANTAG_HUD)
 	//pressure_resistance = 8
 	mouse_drag_pointer = MOUSE_ACTIVE_POINTER
 	throwforce = 10
@@ -39,7 +38,7 @@
 	/// List of movement speed modifiers ignored by this mob. List -> List (id) -> List (sources)
 	var/list/movespeed_mod_immunities //Lazy list, see mob_movespeed.dm
 	/// The calculated mob speed slowdown based on the modifiers list
-	var/cached_multiplicative_slowdown
+	var/movement_delay
 	/// List of action speed modifiers applying to this mob
 	var/list/actionspeed_modification //Lazy list, see mob_movespeed.dm
 	/// List of action speed modifiers ignored by this mob. List -> List (id) -> List (sources)
@@ -51,6 +50,7 @@
 	/// A list of chameleon actions we have specifically
 	/// This can be unified with the actions list
 	var/list/datum/action/item_action/chameleon/chameleon_item_actions
+
 	///Cursor icon used when holding shift over things
 	var/examine_cursor_icon = 'icons/effects/mouse_pointers/examine_pointer.dmi'
 
@@ -225,3 +225,8 @@
 	var/datum/client_interface/mock_client
 
 	var/interaction_range = 0 //how far a mob has to be to interact with something without caring about obsctruction, defaulted to 0 tiles
+
+	/// Keeps track of what ambience we are playing. Yeah i know it sucks.
+	var/playing_ambience
+	/// A ref of the area we're taking our ambient loop from.
+	var/area/ambience_tracked_area

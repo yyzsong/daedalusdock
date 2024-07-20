@@ -7,8 +7,8 @@
 	w_class = WEIGHT_CLASS_HUGE
 	slot_flags = ITEM_SLOT_BELT
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
-	custom_price = PAYCHECK_MEDIUM * 10
-	custom_premium_price = PAYCHECK_MEDIUM * 14
+	custom_price = PAYCHECK_ASSISTANT * 15
+	custom_premium_price = PAYCHECK_ASSISTANT * 22
 
 	var/obj/item/reagent_containers/beaker = null ///Creating an empty slot for a beaker that can be added to dispense into
 	var/amount = 30 ///The amount of reagent that is to be dispensed currently
@@ -80,7 +80,7 @@
 /obj/item/storage/portable_chem_mixer/AltClick(mob/living/user)
 	if(!atom_storage.locked)
 		return ..()
-	if(!can_interact(user) || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	if(!can_interact(user) || !user.canUseTopic(src, USE_CLOSE|USE_IGNORE_TK))
 		return
 	replace_beaker(user)
 	update_appearance()
@@ -164,7 +164,7 @@
 		is_hallucinating = TRUE
 	for(var/re in dispensable_reagents)
 		var/value = dispensable_reagents[re]
-		var/datum/reagent/temp = GLOB.chemical_reagents_list[re]
+		var/datum/reagent/temp = SSreagents.chemical_reagents_list[re]
 		if(temp)
 			var/chemname = temp.name
 			var/total_volume = 0

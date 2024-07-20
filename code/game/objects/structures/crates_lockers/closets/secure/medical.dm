@@ -31,7 +31,7 @@
 		new /obj/item/clothing/mask/muzzle/breath(src)
 
 /obj/structure/closet/secure_closet/medical3
-	name = "medical doctor's locker"
+	name = "'s locker"
 	req_access = list(ACCESS_SURGERY)
 	icon_state = "med_secure"
 
@@ -59,7 +59,6 @@
 	new /obj/item/clothing/under/suit/black/skirt(src)
 	new /obj/item/clothing/shoes/laceup(src)
 	new /obj/item/storage/backpack/medic(src)
-	new /obj/item/radio/headset/headset_srvmed(src)
 	new /obj/item/clipboard(src)
 	new /obj/item/clothing/suit/straight_jacket(src)
 	new /obj/item/clothing/ears/earmuffs(src)
@@ -82,8 +81,7 @@
 	new /obj/item/megaphone/command(src)
 	new /obj/item/defibrillator/compact/loaded(src)
 	new /obj/item/assembly/flash/handheld(src)
-	// new /obj/item/reagent_containers/hypospray/cmo(src) //ORIGINAL
-	new /obj/item/storage/hypospraykit/cmo(src) //PARIAH EDIT
+	new /obj/item/reagent_containers/hypospray/cmo(src)
 	new /obj/item/autosurgeon/organ/cmo(src)
 	new /obj/item/clothing/neck/petcollar(src)
 	new /obj/item/pet_carrier(src)
@@ -131,3 +129,18 @@
 	new /obj/item/storage/box/syringes/variety(src)
 	new /obj/item/storage/box/beakers/variety(src)
 	new /obj/item/clothing/glasses/science(src)
+
+/obj/structure/closet/secure_closet/chemical/cartridge
+	name = "cartridge closet"
+	desc = "Store dangerous chemical cartridges in here."
+	req_access = list(ACCESS_PHARMACY)
+	icon_door = "chemical"
+
+/obj/structure/closet/secure_closet/chemical/cartridge/PopulateContents()
+	var/list/spawn_cartridges = GLOB.cartridge_list_chems
+
+	for(var/datum/reagent/chem_type as anything in spawn_cartridges)
+		var/obj/item/reagent_containers/chem_cartridge/chem_cartridge = spawn_cartridges[chem_type]
+		chem_cartridge = new chem_cartridge(src)
+		chem_cartridge.reagents.add_reagent(chem_type, chem_cartridge.volume)
+		chem_cartridge.setLabel(initial(chem_type.name))

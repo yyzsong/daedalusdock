@@ -9,14 +9,11 @@
 //////////////////////////////////////////////////////////////////
 /datum/surgery_step/limb
 	can_infect = 0
-	shock_level = 40
 	delicate = 1
 	abstract_type = /datum/surgery_step/limb
 
 /datum/surgery_step/limb/assess_bodypart(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
-	var/obj/item/bodypart/affected = target.get_bodypart(target_zone, TRUE)
-	if(affected)
-		return affected
+	return TRUE
 
 //////////////////////////////////////////////////////////////////
 //	 limb attachment surgery step
@@ -45,20 +42,20 @@
 
 /datum/surgery_step/limb/attach/begin_step(mob/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/bodypart/BP = tool
-	user.visible_message(span_notice("[user] starts attaching the [BP.plaintext_zone] to [target]'s [BP.amputation_point]."))
+	user.visible_message(span_notice("[user] starts attaching the [BP.plaintext_zone] to [target]'s [BP.amputation_point]."), vision_distance = COMBAT_MESSAGE_RANGE)
 	..()
 
 /datum/surgery_step/limb/attach/succeed_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	if(!user.temporarilyRemoveItemFromInventory(tool))
 		return
 	var/obj/item/bodypart/BP = tool
-	user.visible_message(span_notice("[user] has attached the [BP.plaintext_zone]  to [target]'s [BP.amputation_point]."))
+	user.visible_message(span_notice("[user] has attached the [BP.plaintext_zone] to [target]'s [BP.amputation_point]."), vision_distance = COMBAT_MESSAGE_RANGE)
 	BP.attach_limb(target)
 	..()
 
 /datum/surgery_step/limb/attach/fail_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/bodypart/BP = target.get_bodypart(target_zone, TRUE)
-	user.visible_message(span_warning("[user]'s hand slips, damaging [target]'s [BP.amputation_point]!"))
+	user.visible_message(span_warning("[user]'s hand slips, damaging [target]'s [BP.amputation_point]!"), vision_distance = COMBAT_MESSAGE_RANGE)
 	target.apply_damage(10, BRUTE, BODY_ZONE_CHEST, sharpness = SHARP_EDGED)
 	..()
 
@@ -75,6 +72,7 @@
 	can_infect = 1
 	min_duration = 10 SECONDS
 	max_duration = 12 SECONDS
+	pain_given = PAIN_AMT_AGONIZING //THEMS ARE NERVES
 
 /datum/surgery_step/limb/connect/can_operate(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	if(..())
@@ -83,18 +81,18 @@
 
 /datum/surgery_step/limb/connect/begin_step(mob/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/bodypart/BP = target.get_bodypart(target_zone)
-	user.visible_message(span_notice("[user] starts connecting tendons and muscles in [target]'s [BP.amputation_point] with [tool]."))
+	user.visible_message(span_notice("[user] starts connecting tendons and muscles in [target]'s [BP.amputation_point] with [tool]."), vision_distance = COMBAT_MESSAGE_RANGE)
 	..()
 
 /datum/surgery_step/limb/connect/succeed_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/bodypart/BP = target.get_bodypart(target_zone)
-	user.visible_message(span_notice("[user] has connected tendons and muscles in [target]'s [BP.amputation_point] with [tool]."))
+	user.visible_message(span_notice("[user] has connected tendons and muscles in [target]'s [BP.amputation_point] with [tool]."), vision_distance = COMBAT_MESSAGE_RANGE)
 	BP.bodypart_flags &= ~BP_CUT_AWAY
 	BP.update_disabled()
 	..()
 
 /datum/surgery_step/limb/connect/fail_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/bodypart/BP = target.get_bodypart(target_zone)
-	user.visible_message(span_warning("[user]'s hand slips, damaging [target]'s [BP.amputation_point]!"))
+	user.visible_message(span_warning("[user]'s hand slips, damaging [target]'s [BP.amputation_point]!"), vision_distance = COMBAT_MESSAGE_RANGE)
 	target.apply_damage(10, BRUTE, BODY_ZONE_CHEST, sharpness = tool.sharpness)
 	..()

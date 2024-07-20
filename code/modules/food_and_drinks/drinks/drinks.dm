@@ -31,8 +31,6 @@
 	if(M == user)
 		user.visible_message(span_notice("[user] swallows a gulp of [src]."), \
 			span_notice("You swallow a gulp of [src]."))
-		if(HAS_TRAIT(M, TRAIT_VORACIOUS))
-			M.changeNext_move(CLICK_CD_MELEE * 0.5) //chug! chug! chug!
 
 	else
 		M.visible_message(span_danger("[user] attempts to feed [M] the contents of [src]."), \
@@ -236,7 +234,7 @@
 /obj/item/reagent_containers/food/drinks/ice
 	name = "ice cup"
 	desc = "Careful, cold ice, do not chew."
-	custom_price = PAYCHECK_PRISONER * 0.6
+	custom_price = PAYCHECK_ASSISTANT * 0.4
 	icon_state = "coffee"
 	list_reagents = list(/datum/reagent/consumable/ice = 30)
 	spillable = TRUE
@@ -269,7 +267,12 @@
 	list_reagents = list(/datum/reagent/consumable/hot_coco = 15, /datum/reagent/consumable/sugar = 5)
 	foodtype = SUGAR
 	resistance_flags = FREEZE_PROOF
-	custom_price = PAYCHECK_ASSISTANT * 1.2
+	custom_price = PAYCHECK_ASSISTANT * 0.9
+
+/obj/item/reagent_containers/food/drinks/mug/beagle
+	name = "beagle mug"
+	desc = "A heavy mug. A beagle mug. Careful not to break it!"
+	icon_state = "beaglemug"
 
 
 /obj/item/reagent_containers/food/drinks/dry_ramen
@@ -279,7 +282,7 @@
 	list_reagents = list(/datum/reagent/consumable/dry_ramen = 15, /datum/reagent/consumable/salt = 3)
 	foodtype = GRAIN
 	isGlass = FALSE
-	custom_price = PAYCHECK_ASSISTANT * 0.9
+	custom_price = PAYCHECK_ASSISTANT * 0.4
 
 /obj/item/reagent_containers/food/drinks/waterbottle
 	name = "bottle of water"
@@ -299,7 +302,7 @@
 	var/cap_lost = FALSE
 	var/mutable_appearance/cap_overlay
 	var/flip_chance = 10
-	custom_price = PAYCHECK_PRISONER * 0.8
+	custom_price = PAYCHECK_ASSISTANT * 0.5
 
 /obj/item/reagent_containers/food/drinks/waterbottle/Initialize(mapload)
 	. = ..()
@@ -583,7 +586,7 @@
 /obj/item/reagent_containers/food/drinks/flask
 	name = "flask"
 	desc = "Every good spaceman knows it's a good idea to bring along a couple of pints of whiskey wherever they go."
-	custom_price = PAYCHECK_HARD * 2
+	custom_price = PAYCHECK_ASSISTANT * 3.5
 	icon_state = "flask"
 	custom_materials = list(/datum/material/iron=250)
 	volume = 60

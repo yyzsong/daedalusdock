@@ -25,11 +25,11 @@
 	C.gain_trauma(/datum/brain_trauma/special/obsessed)//ZAP
 
 /datum/antagonist/obsessed/greet()
+	. = ..()
 	owner.current.playsound_local(get_turf(owner.current), 'sound/ambience/antag/creepalert.ogg', 100, FALSE, pressure_affected = FALSE, use_reverb = FALSE)
 	var/policy = get_policy(ROLE_OBSESSED)
 	if(policy)
 		to_chat(owner, policy)
-	owner.announce_objectives()
 
 /datum/antagonist/obsessed/Destroy()
 	if(trauma)
@@ -43,7 +43,9 @@
 	victim_dummy.update_body_parts()
 
 	var/icon/obsessed_icon = render_preview_outfit(preview_outfit, victim_dummy)
-	obsessed_icon.Blend(icon('icons/effects/blood.dmi', "uniformblood"), ICON_OVERLAY)
+	var/icon/blood_overlay = icon('icons/effects/blood.dmi', "uniformblood")
+	blood_overlay.Blend(COLOR_HUMAN_BLOOD, ICON_MULTIPLY)
+	obsessed_icon.Blend(blood_overlay, ICON_OVERLAY)
 
 	var/icon/final_icon = finish_preview_icon(obsessed_icon)
 
@@ -64,11 +66,6 @@
 	mask = /obj/item/clothing/mask/surgical
 	l_hand = /obj/item/camera
 	suit = /obj/item/clothing/suit/apron/surgical
-
-/datum/outfit/obsessed/post_equip(mob/living/carbon/human/H)
-	for(var/obj/item/carried_item in H.get_equipped_items(TRUE))
-		carried_item.add_mob_blood(H)//Oh yes, there will be blood...
-	H.regenerate_icons()
 
 /datum/antagonist/obsessed/proc/forge_objectives(datum/mind/obsessionmind)
 	var/list/objectives_left = list("spendtime", "polaroid", "hug")

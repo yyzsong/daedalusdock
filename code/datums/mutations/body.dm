@@ -48,8 +48,7 @@
 	if(new_mob && ismob(new_mob))
 		owner = new_mob
 	. = owner
-	on_losing(owner)
-
+	remove_from_owner()
 
 //Cough gives you a chronic cough that causes you to drop items.
 /datum/mutation/human/cough
@@ -303,36 +302,6 @@
 		return
 	owner.physiology.burn_mod *= 2
 
-/datum/mutation/human/badblink
-	name = "Spatial Instability"
-	desc = "The victim of the mutation has a very weak link to spatial reality, and may be displaced. Often causes extreme nausea."
-	quality = NEGATIVE
-	text_gain_indication = "<span class='warning'>The space around you twists sickeningly.</span>"
-	text_lose_indication = "<span class='notice'>The space around you settles back to normal.</span>"
-	difficulty = 18//high so it's hard to unlock and abuse
-	instability = 10
-	synchronizer_coeff = 1
-	energy_coeff = 1
-	power_coeff = 1
-	var/warpchance = 0
-
-/datum/mutation/human/badblink/on_life(delta_time, times_fired)
-	if(DT_PROB(warpchance, delta_time))
-		var/warpmessage = pick(
-		span_warning("With a sickening 720-degree twist of [owner.p_their()] back, [owner] vanishes into thin air."),
-		span_warning("[owner] does some sort of strange backflip into another dimension. It looks pretty painful."),
-		span_warning("[owner] does a jump to the left, a step to the right, and warps out of reality."),
-		span_warning("[owner]'s torso starts folding inside out until it vanishes from reality, taking [owner] with it."),
-		span_warning("One moment, you see [owner]. The next, [owner] is gone."))
-		owner.visible_message(warpmessage, span_userdanger("You feel a wave of nausea as you fall through reality!"))
-		var/warpdistance = rand(10, 15) * GET_MUTATION_POWER(src)
-		do_teleport(owner, get_turf(owner), warpdistance, channel = TELEPORT_CHANNEL_FREE)
-		owner.adjust_disgust(GET_MUTATION_SYNCHRONIZER(src) * (warpchance * warpdistance))
-		warpchance = 0
-		owner.visible_message(span_danger("[owner] appears out of nowhere!"))
-	else
-		warpchance += 0.0625 * GET_MUTATION_ENERGY(src) * delta_time
-
 /datum/mutation/human/acidflesh
 	name = "Acidic Flesh"
 	desc = "Subject has acidic chemicals building up underneath the skin. This is often lethal."
@@ -424,49 +393,3 @@
 		return //remove the 'edge' cases
 	to_chat(owner, span_danger("You trip over your own feet."))
 	owner.Knockdown(30)
-
-/datum/mutation/human/martyrdom
-	name = "Internal Martyrdom"
-	desc = "A mutation that makes the body destruct when near death. Not damaging, but very, VERY disorienting."
-	locked = TRUE
-	quality = POSITIVE //not that cloning will be an option a lot but generally lets keep this around i guess?
-	text_gain_indication = "<span class='warning'>You get an intense feeling of heartburn.</span>"
-	text_lose_indication = "<span class='notice'>Your internal organs feel at ease.</span>"
-
-/datum/mutation/human/martyrdom/on_acquiring()
-	. = ..()
-	if(.)
-		return TRUE
-	RegisterSignal(owner, COMSIG_MOB_STATCHANGE, PROC_REF(bloody_shower))
-
-/datum/mutation/human/martyrdom/on_losing()
-	. = ..()
-	if(.)
-		return TRUE
-	UnregisterSignal(owner, COMSIG_MOB_STATCHANGE)
-
-/datum/mutation/human/martyrdom/proc/bloody_shower(datum/source, new_stat)
-	SIGNAL_HANDLER
-
-	if(new_stat != HARD_CRIT)
-		return
-	var/list/organs = owner.getorgansofzone(BODY_ZONE_HEAD, TRUE)
-
-	for(var/obj/item/organ/I in organs)
-		qdel(I)
-
-	explosion(owner, light_impact_range = 2, adminlog = TRUE, explosion_cause = src)
-	for(var/mob/living/carbon/human/H in view(2,owner))
-		var/obj/item/organ/eyes/eyes = H.getorganslot(ORGAN_SLOT_EYES)
-		if(eyes)
-			to_chat(H, span_userdanger("You are blinded by a shower of blood!"))
-		else
-			to_chat(H, span_userdanger("You are knocked down by a wave of... blood?!"))
-		H.Stun(20)
-		H.blur_eyes(20)
-		eyes?.applyOrganDamage(5)
-		H.adjust_timed_status_effect(3 SECONDS, /datum/status_effect/confusion)
-	for(var/mob/living/silicon/S in view(2,owner))
-		to_chat(S, span_userdanger("Your sensors are disabled by a shower of blood!"))
-		S.Paralyze(60)
-	owner.gib()

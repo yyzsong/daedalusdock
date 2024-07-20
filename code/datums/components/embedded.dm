@@ -91,7 +91,7 @@
 		damage += weapon.w_class * impact_pain_mult
 		var/post_armor_damage = damage
 		if(limb_owner)
-			var/armor = limb_owner.run_armor_check(limb.body_zone, MELEE, "Your armor has protected your [limb.plaintext_zone].", "Your armor has softened a hit to your [limb.plaintext_zone].",I.armour_penetration, weak_against_armour = I.weak_against_armour)
+			var/armor = limb_owner.run_armor_check(limb.body_zone, PUNCTURE, "Your armor has protected your [limb.plaintext_zone].", "Your armor has softened a hit to your [limb.plaintext_zone].",I.armor_penetration, weak_against_armor = I.weak_against_armor)
 			post_armor_damage = damage * ((100-armor)/100)
 
 		if(post_armor_damage <= 0)
@@ -188,7 +188,7 @@
 
 	if(harmful && prob(chance))
 		var/damage = weapon.w_class * jostle_pain_mult
-		limb.receive_damage(brute=(1-pain_stam_pct) * damage)
+		limb.receive_damage(brute=(1-pain_stam_pct) * damage, modifiers = DAMAGE_CAN_JOSTLE_BONES)
 		limb_owner.stamina.adjust(-(pain_stam_pct * damage))
 		var/msg = pick( \
 			"A spike of pain jolts your [limb.plaintext_zone] as you bump [weapon] inside.",\
@@ -203,7 +203,7 @@
 	var/obj/item/bodypart/limb = parent
 	if(harmful)
 		var/damage = weapon.w_class * remove_pain_mult
-		limb.receive_damage(brute=(1-pain_stam_pct) * damage)
+		limb.receive_damage(brute=(1-pain_stam_pct) * damage, modifiers = DAMAGE_CAN_JOSTLE_BONES)
 		if(limb_owner)
 			limb_owner.stamina.adjust(-(pain_stam_pct * damage))
 
@@ -235,36 +235,37 @@
 			span_warning("[user] attempts to remove [weapon] from [limb_owner]'s [limb.plaintext_zone].")
 		)
 
+	if(harmful && user.stats.cooldown_finished("ripout_embed_check"))
+		user.stats.set_cooldown("ripout_embed_check", INFINITY)
+		var/datum/roll_result/result = user.stat_roll(12, /datum/rpg_skill/handicraft)
+		switch(result.outcome)
+			if(CRIT_SUCCESS)
+				harmful = FALSE
+				time_taken = 0
+				to_chat(user, result.create_tooltip("Many hours spent on delicate projects has prepared you for this moment. (Instant and harmless removal)"))
+
+			if(SUCCESS)
+				time_taken = time_taken * 0.2
+				to_chat(user, result.create_tooltip("Your hands are more than accustomed to careful tasks. (Accelerated removal)"))
+
+			if(CRIT_FAILURE)
+				to_chat(user, result.create_tooltip("At a crucial moment, you second guess yourself, pressing the object deeper into your flesh."))
+				user.stats.set_cooldown("ripout_embed_check", 5 MINUTES)
+				rip_out_damage(limb)
+				return
+
 	if(!do_after(user, limb_owner, time = time_taken, timed_action_flags = DO_PUBLIC, display = image('icons/hud/do_after.dmi', "help")))
 		return
+
+	user.stats.set_cooldown("ripout_embed_check", 0)
 
 	if(!weapon || !limb || weapon.loc != limb || !(weapon in limb.embedded_objects))
 		qdel(src)
 		return
 
 	if(harmful)
-		var/damage = weapon.w_class * remove_pain_mult
-		for(var/datum/wound/W as anything in limb.wounds)
-			if(weapon in W.embedded_objects)
-				W.open_wound((1-pain_stam_pct) * damage)
-				break
+		rip_out_damage(limb)
 
-		if(limb_owner)
-			limb_owner.stamina.adjust(-(pain_stam_pct * damage))
-			limb_owner.emote("scream")
-
-			if(!IS_ORGANIC_LIMB(limb))
-				user.visible_message(
-					span_danger("The damage to \the [limb_owner]'s [limb.plaintext_zone] worsens."),\
-					span_danger("The damage to your [limb.plaintext_zone] worsens."),\
-					span_danger("You hear the screech of abused metal.")
-				)
-			else
-				limb_owner.visible_message(
-					span_danger("The wound on \the [limb_owner]'s [limb.plaintext_zone] widens with a nasty ripping noise."),\
-					span_danger("The wound on your [limb.plaintext_zone] widens with a nasty ripping noise."),\
-					span_danger("You hear a nasty ripping noise, as if flesh is being torn apart.")
-				)
 	if(user == limb_owner)
 		user.visible_message(
 			span_warning("[user] successfully rips [weapon] [harmful ? "out" : "off"] of [user.p_their()] [limb.plaintext_zone]!"),
@@ -275,6 +276,30 @@
 		)
 
 	safeRemove(user)
+
+/datum/component/embedded/proc/rip_out_damage(obj/item/bodypart/limb)
+	var/damage = weapon.w_class * remove_pain_mult
+	for(var/datum/wound/W as anything in limb.wounds)
+		if(weapon in W.embedded_objects)
+			W.open_wound((1-pain_stam_pct) * damage)
+			break
+
+	if(limb_owner)
+		limb_owner.stamina.adjust(-(pain_stam_pct * damage))
+		limb_owner.emote("pain")
+
+		if(!IS_ORGANIC_LIMB(limb))
+			limb_owner.visible_message(
+				span_warning("The damage to \the [limb_owner]'s [limb.plaintext_zone] worsens."),\
+				span_warning("The damage to your [limb.plaintext_zone] worsens."),\
+				span_hear("You hear the screech of abused metal.")
+			)
+		else
+			limb_owner.visible_message(
+				span_warning("The wound on \the [limb_owner]'s [limb.plaintext_zone] widens with a nasty ripping noise."),\
+				span_warning("The wound on your [limb.plaintext_zone] widens with a nasty ripping noise."),\
+				span_hear("You hear a nasty ripping noise, as if flesh is being torn apart.")
+			)
 
 /// This proc handles the final step and actual removal of an embedded/stuck item from a carbon, whether or not it was actually removed safely.
 /// If you want the thing to go into someone's hands rather than the floor, pass them in to_hands

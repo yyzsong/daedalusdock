@@ -66,7 +66,7 @@
 	if(restricted_mode || is_banned_from(ckey, "Bug Report"))
 		to_chat(src, span_warning("You are not currently allowed to make a bug report through this system."))
 		return
-	if(tgui_alert(src, "This will start reporting an issue, gathering some information from the server and your client, before submitting it to github.", "Report Issue","Continue","Abort")!="Continue")
+	if(tgui_alert(src, "This will start reporting an issue, gathering some information from the server and your client, before submitting it to github.", "Report Issue",list("Continue","Abort"))!="Continue")
 		return
 	if(GLOB.revdata.testmerge.len || GLOB.Debug2)
 		if(tgalert(src, "Experimental code is enabled on the server, Please check <code>Show-Server-Revision</code> for more information.", "Report Issue","Continue","Abort")!="Continue")
@@ -106,13 +106,13 @@
 
 	local_template = replacetext(local_template, "## Reproduction:\n", "## Reproduction:\n[user_description]")
 
-	var/client_info = "\
+	var/client_info = "```\
 	Client Information:\n\
 	BYOND:[byond_version].[byond_build]\n\
 	Key:[ckey]\n\
-	\
+	```\
 	"
-	var/issue_body = "```\nReporting client info:\n[client_info]\n\n[local_template]```"
+	var/issue_body = "\nReporting client info:\n[client_info]\n\n[local_template]"
 	var/list/body_structure = list(
 		"title" = issue_title,
 		"body" = issue_body
@@ -175,4 +175,4 @@
 		to_chat(src, "Map ID Missing from config.")
 	if(length(world.TgsTestMerges()))
 		alert(src, "Notice: Test Merges are active, this map may not be fully accurate!", "Testmerge Notice", "OK")
-	src << link("https://affectedarc07.github.io/SS13WebMap/[CONFIG_GET(string/webmap_community)]/[SSmapping.config.webmap_id]")
+	src << link("https://webmap.affectedarc07.co.uk/[CONFIG_GET(string/webmap_community)]/[SSmapping.config.webmap_id]")

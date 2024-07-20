@@ -27,10 +27,6 @@
 	. = ..()
 	register_item_context()
 
-/obj/item/stack/sticky_tape/examine(mob/user)
-	. = ..()
-	. += span_notice("<b>Left-click</b> to restrain someone. Target mouth to gag.")
-
 /obj/item/stack/sticky_tape/add_item_context(
 	obj/item/source,
 	list/context,
@@ -122,10 +118,8 @@
 	victim.visible_message(span_danger("[user] is trying to restrain [victim] with [src]!"), \
 							span_userdanger("[user] begins wrapping [src] around your wrists!"))
 	if(do_after(user, victim, handcuff_delay, DO_PUBLIC, display = src))
-		if(!victim.handcuffed)
+		if(victim.equip_to_slot_if_possible(new /obj/item/restraints/handcuffs/tape(victim), ITEM_SLOT_HANDCUFFED, TRUE, TRUE, null, TRUE))
 			use(1)
-			victim.set_handcuffed(new /obj/item/restraints/handcuffs/tape(victim))
-			victim.update_handcuffed()
 			victim.visible_message("<span class='notice'>[user] binds [victim]'s hands.</span>", \
 								"<span class='userdanger'>[user] handcuffs you.</span>")
 			log_combat(user, victim, "tapecuffed")
@@ -173,6 +167,6 @@
 	prefix = "surgical"
 	conferred_embed = list("embed_chance" = 30, "pain_mult" = 0, "jostle_pain_mult" = 0, "ignore_throwspeed_threshold" = TRUE)
 	splint_slowdown = 3
-	custom_price = PAYCHECK_MEDIUM
+	custom_price = PAYCHECK_ASSISTANT * 0.4
 	merge_type = /obj/item/stack/sticky_tape/surgical
 	tape_gag = /obj/item/clothing/mask/muzzle/tape/surgical

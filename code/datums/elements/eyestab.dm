@@ -3,7 +3,7 @@
 
 /// An element that lets you stab people in the eyes when targeting them
 /datum/element/eyestab
-	element_flags = ELEMENT_BESPOKE | ELEMENT_DETACH
+	element_flags = ELEMENT_BESPOKE
 	id_arg_index = 2
 
 	/// The amount of damage to do per eyestab
@@ -34,7 +34,7 @@
 
 		perform_eyestab(source, target, user)
 
-		return COMPONENT_SKIP_ATTACK
+		return COMPONENT_SKIP_ATTACK_STEP
 
 /datum/element/eyestab/proc/perform_eyestab(obj/item/item, mob/living/target, mob/living/user)
 	var/obj/item/bodypart/target_limb = target.get_bodypart(BODY_ZONE_HEAD)
@@ -56,7 +56,7 @@
 
 	item.add_fingerprint(user)
 
-	playsound(item, item.hitsound, 30, TRUE, -1)
+	playsound(item, item.get_hitsound(), 30, TRUE, -1)
 
 	user.do_attack_animation(target)
 

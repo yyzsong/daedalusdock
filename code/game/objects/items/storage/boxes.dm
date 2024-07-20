@@ -31,6 +31,8 @@
 	resistance_flags = FLAMMABLE
 	drop_sound = 'sound/items/handling/cardboardbox_drop.ogg'
 	pickup_sound = 'sound/items/handling/cardboardbox_pickup.ogg'
+
+	storage_type = /datum/storage/box
 	var/foldable = /obj/item/stack/sheet/cardboard
 	var/illustration = "writing"
 
@@ -153,7 +155,7 @@
 
 // Mining survival box
 /obj/item/storage/box/survival/mining
-	mask_type = /obj/item/clothing/mask/gas/explorer
+	mask_type = /obj/item/clothing/mask/breath
 
 /obj/item/storage/box/survival/mining/PopulateContents()
 	..()
@@ -710,7 +712,7 @@
 	slot_flags = ITEM_SLOT_BELT
 	drop_sound = 'sound/items/handling/matchbox_drop.ogg'
 	pickup_sound = 'sound/items/handling/matchbox_pickup.ogg'
-	custom_price = PAYCHECK_ASSISTANT * 0.4
+	custom_price = PAYCHECK_ASSISTANT * 0.3
 	base_icon_state = "matchbox"
 	illustration = null
 
@@ -1199,7 +1201,7 @@
 	w_class = WEIGHT_CLASS_TINY
 	illustration = null
 	foldable = null
-	custom_price = PAYCHECK_EASY
+	custom_price = PAYCHECK_ASSISTANT * 0.2
 
 /obj/item/storage/box/gum/Initialize()
 	. = ..()
@@ -1325,7 +1327,6 @@
 		/obj/item/slimecross/stabilized/oil=1,\
 		/obj/item/slimecross/stabilized/black=1,\
 		/obj/item/slimecross/stabilized/lightpink=1,\
-		/obj/item/slimecross/stabilized/adamantine=1,\
 		/obj/item/slimecross/stabilized/rainbow=1,\
 		)
 	generate_items_inside(items_inside,src)
@@ -1530,20 +1531,6 @@
 	new /obj/item/clothing/mask/gas/carp(src)
 	new /obj/item/knife/hunting(src)
 	new /obj/item/storage/box/papersack/meat(src)
-
-/obj/item/storage/box/hero/mothpioneer
-	name = "Mothic Fleet Pioneer - 2100's."
-	desc = "Some claim that the fleet engineers are directly responsible for most modern advancement in spacefaring design. Although the exact details of their past contributions are somewhat fuzzy, their ingenuity remains unmatched and unquestioned to this day."
-
-/obj/item/storage/box/hero/mothpioneer/PopulateContents()
-	new /obj/item/clothing/suit/mothcoat/original(src)
-	new /obj/item/clothing/head/mothcap(src)
-	new /obj/item/flashlight/lantern(src)
-	new /obj/item/screwdriver(src)
-	new /obj/item/wrench(src)
-	new /obj/item/crowbar(src)
-	new /obj/item/stack/sheet/iron/fifty(src)
-	new /obj/item/stack/sheet/glass/fifty(src)
 
 /obj/item/storage/box/holy/clock
 	name = "Forgotten kit"

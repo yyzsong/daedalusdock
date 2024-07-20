@@ -4,7 +4,7 @@
 	plural_form = "Podpeople"
 	id = SPECIES_PODPERSON
 	default_color = "59CE00"
-	species_traits = list(MUTCOLORS, EYECOLOR, HAS_FLESH, HAS_BONE)
+	species_traits = list(MUTCOLORS, EYECOLOR)
 	inherent_traits = list(
 		TRAIT_ADVANCEDTOOLUSER,
 		TRAIT_CAN_STRIP,
@@ -18,7 +18,6 @@
 
 	burnmod = 1.25
 	heatmod = 1.5
-	payday_modifier = 0.75
 	job_outfit_type = SPECIES_HUMAN
 	meat = /obj/item/food/meat/slab/human/mutant/plant
 	exotic_blood = /datum/reagent/water

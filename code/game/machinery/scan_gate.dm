@@ -13,7 +13,6 @@
 #define SCANGATE_MOTH "moth"
 #define SCANGATE_JELLY "jelly"
 #define SCANGATE_POD "pod"
-#define SCANGATE_GOLEM "golem"
 #define SCANGATE_ZOMBIE "zombie"
 #define SCANGATE_TESHARI "teshari"
 
@@ -23,7 +22,6 @@
 	icon = 'icons/obj/machines/scangate.dmi'
 	icon_state = "scangate"
 	circuit = /obj/item/circuitboard/machine/scanner_gate
-	loc_procs = CROSSED
 
 	var/scanline_timer
 	///Internal timer to prevent audio spam.
@@ -52,6 +50,10 @@
 	. = ..()
 	wires = new /datum/wires/scanner_gate(src)
 	set_scanline("passive")
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = PROC_REF(on_entered),
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
 
 /obj/machinery/scanner_gate/Destroy()
 	qdel(wires)
@@ -65,8 +67,11 @@
 	else
 		. += span_notice("The control panel is unlocked. Swipe an ID to lock it.")
 
-/obj/machinery/scanner_gate/Crossed(atom/movable/crossed_by, oldloc)
-	INVOKE_ASYNC(src, PROC_REF(auto_scan), crossed_by)
+/obj/machinery/scanner_gate/proc/on_entered(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
+	if(AM == src)
+		return
+	INVOKE_ASYNC(src, PROC_REF(auto_scan), AM)
 
 /obj/machinery/scanner_gate/proc/auto_scan(atom/movable/AM)
 	if(!(machine_stat & (BROKEN|NOPOWER)) && isliving(AM) & (!panel_open))
@@ -119,9 +124,10 @@
 			if(ishuman(M))
 				var/mob/living/carbon/human/H = M
 				var/perpname = H.get_face_name(H.get_id_name())
-				var/datum/data/record/R = find_record("name", perpname, GLOB.data_core.security)
-				if(!R || (R.fields["criminal"] == "*Arrest*"))
+				var/datum/data/record/security/R = SSdatacore.get_record_by_name(perpname, DATACORE_RECORDS_SECURITY)
+				if(!R || (R.fields[DATACORE_CRIMINAL_STATUS] == CRIMINAL_WANTED))
 					beep = TRUE
+
 		if(SCANGATE_MINDSHIELD)
 			if(HAS_TRAIT(M, TRAIT_MINDSHIELD))
 				beep = TRUE
@@ -147,8 +153,6 @@
 						scan_species = /datum/species/jelly
 					if(SCANGATE_POD)
 						scan_species = /datum/species/pod
-					if(SCANGATE_GOLEM)
-						scan_species = /datum/species/golem
 					if(SCANGATE_ZOMBIE)
 						scan_species = /datum/species/zombie
 					if(SCANGATE_TESHARI)
@@ -274,6 +278,5 @@
 #undef SCANGATE_MOTH
 #undef SCANGATE_JELLY
 #undef SCANGATE_POD
-#undef SCANGATE_GOLEM
 #undef SCANGATE_ZOMBIE
 #undef SCANGATE_TESHARI
