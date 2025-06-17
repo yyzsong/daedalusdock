@@ -22,7 +22,6 @@
 		/obj/item/radio,
 		/obj/item/storage/fancy/cigarettes,
 		/obj/item/tank/internals/emergency_oxygen,
-		/obj/item/tank/internals/plasmaman,
 		/obj/item/toy,
 		/obj/item/storage/bag/books,
 	)
@@ -100,12 +99,10 @@
 	icon_state = "coathydro"
 	inhand_icon_state = "coathydro"
 	allowed = list(
-		/obj/item/cultivator,
 		/obj/item/hatchet,
 		/obj/item/plant_analyzer,
 		/obj/item/reagent_containers/spray/plantbgone,
 		/obj/item/reagent_containers/glass/bottle,
-		/obj/item/reagent_containers/spray/pestspray,
 		/obj/item/seeds,
 		/obj/item/storage/bag/plants,
 	)
@@ -347,7 +344,7 @@
 /obj/item/clothing/suit/hooded/wintercoat/engineering/worn_overlays(mob/living/carbon/human/wearer, mutable_appearance/standing, isinhands, icon_file)
 	. = ..()
 	if(!isinhands)
-		. += emissive_appearance(icon_file, "[icon_state]-emissive", alpha = src.alpha)
+		. += emissive_appearance(icon_file, "[icon_state]-emissive", alpha = 90)
 
 /obj/item/clothing/head/hooded/winterhood/engineering
 	desc = "A yellow winter coat hood. Definitely not a replacement for a hard hat."
@@ -358,7 +355,7 @@
 /obj/item/clothing/head/hooded/winterhood/engineering/worn_overlays(mob/living/carbon/human/wearer, mutable_appearance/standing, isinhands, icon_file)
 	. = ..()
 	if(!isinhands)
-		. += emissive_appearance(icon_file, "[icon_state]-emissive", alpha = src.alpha)
+		. += emissive_appearance(icon_file, "[icon_state]-emissive", alpha = 90)
 
 // Chief Engineer
 /obj/item/clothing/suit/hooded/wintercoat/engineering/ce
@@ -446,14 +443,18 @@
 //In case colors are changed after initialization
 /obj/item/clothing/suit/hooded/wintercoat/custom/set_greyscale(list/colors, new_config, queue, new_worn_config, new_inhand_left, new_inhand_right)
 	. = ..()
-	if(hood)
-		var/list/coat_colors = SSgreyscale.ParseColorString(greyscale_colors)
-		var/list/new_coat_colors = coat_colors.Copy(1,4)
-		hood.set_greyscale(new_coat_colors) //Adopt the suit's grayscale coloring for visual clarity.
+	// It's 5 am i really cannot be bothered rn.
+	var/datum/component/hooded/hood_component = GetComponent(/datum/component/hooded)
+	var/obj/item/clothing/hood = hood_component?.hood
+	if(!hood)
+		return
+
+	var/list/coat_colors = SSgreyscale.ParseColorString(greyscale_colors)
+	var/list/new_coat_colors = coat_colors.Copy(1,4)
+	hood.set_greyscale(new_coat_colors) //Adopt the suit's grayscale coloring for visual clarity.
 
 //But also keep old method in case the hood is (re-)created later
-/obj/item/clothing/suit/hooded/wintercoat/custom/MakeHood()
-	. = ..()
+/obj/item/clothing/suit/hooded/wintercoat/custom/on_hood_creation(obj/item/clothing/hood)
 	var/list/coat_colors = (SSgreyscale.ParseColorString(greyscale_colors))
 	var/list/new_coat_colors = coat_colors.Copy(1,4)
 	hood.set_greyscale(new_coat_colors) //Adopt the suit's grayscale coloring for visual clarity.

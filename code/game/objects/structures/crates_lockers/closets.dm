@@ -135,7 +135,7 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
 	if(broken || !secure)
 		return
 	//Overlay is similar enough for both that we can use the same mask for both
-	. += emissive_appearance(icon, "locked", alpha = src.alpha)
+	. += emissive_appearance(icon, "locked", alpha = 90)
 	. += locked ? "locked" : "unlocked"
 
 /// Animates the closet door opening and closing
@@ -145,7 +145,7 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
 	if(!door_obj)
 		door_obj = new
 	var/default_door_icon = "[icon_door || icon_state]_door"
-	vis_contents += door_obj
+	add_viscontents(door_obj)
 	door_obj.icon = icon
 	door_obj.icon_state = default_door_icon
 	is_animating_door = TRUE
@@ -177,7 +177,7 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
 /// Ends the door animation and removes the animated overlay
 /obj/structure/closet/proc/end_door_animation()
 	is_animating_door = FALSE
-	vis_contents -= door_obj
+	remove_viscontents(door_obj)
 	update_icon()
 
 /// Calculates the matrix to be applied to the animated door overlay
@@ -348,6 +348,9 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
  * Toggles a closet open or closed, to the opposite state. Does not respect locked or welded states, however.
  */
 /obj/structure/closet/proc/toggle(mob/living/user)
+	if(user)
+		user.animate_interact(src)
+
 	if(opened)
 		return close(user)
 	else
@@ -512,7 +515,7 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
 		span_warning("You [actuallyismob ? "try to ":""]stuff [O] into [src]."), \
 		span_hear("You hear clanging."))
 	if(actuallyismob)
-		if(do_after_mob(user, targets, 40))
+		if(do_after(user, targets, 40))
 			user.visible_message(span_notice("[user] stuffs [O] into [src]."), \
 				span_notice("You stuff [O] into [src]."), \
 				span_hear("You hear a loud metal bang."))
@@ -689,7 +692,7 @@ DEFINE_INTERACTABLE(/obj/structure/closet)
 				open()
 			else
 				req_access = list()
-				req_access += pick(SSid_access.get_region_access_list(list(REGION_ALL_STATION)))
+				req_access += pick(SSid_access.get_access_for_group(list(/datum/access_group/station/all)))
 
 /obj/structure/closet/singularity_act()
 	dump_contents()

@@ -19,7 +19,7 @@
 	high_threshold_cleared = "<span class='info'>The pain in your stomach dies down for now, but food still seems unappealing.</span>"
 	low_threshold_cleared = "<span class='info'>The last bouts of pain in your stomach have died out.</span>"
 
-	food_reagents = list(/datum/reagent/consumable/nutriment/organ_tissue = 5)
+	food_reagents = null
 	//This is a reagent user and needs more then the 10u from edible component
 	reagent_vol = 1000
 
@@ -52,12 +52,20 @@
 		human_owner.clear_alert(ALERT_NUTRITION)
 	return ..()
 
-/obj/item/organ/stomach/set_organ_dead(failing)
+/obj/item/organ/stomach/set_organ_dead(failing, cause_of_death)
+	. = ..()
 	if(!.)
 		return
 
-	if(organ_flags & ORGAN_DEAD && owner)
+	if((organ_flags & ORGAN_DEAD) && owner)
 		reagents.end_metabolization(owner)
+
+/obj/item/organ/stomach/is_causing_pain()
+	if((owner.nutrition > NUTRITION_LEVEL_STARVING) || !COOLDOWN_FINISHED(owner, mob_cooldowns["hunger_pain"]))
+		return ..()
+
+	COOLDOWN_START(owner, mob_cooldowns["hunger_pain"], rand(40, 120) SECONDS)
+	return TRUE
 
 /obj/item/organ/stomach/on_life(delta_time, times_fired)
 	. = ..()
@@ -109,17 +117,21 @@
 	if(HAS_TRAIT(human, TRAIT_NOHUNGER))
 		return //hunger is for BABIES
 
+	var/show_feedback = !CHEM_EFFECT_MAGNITUDE(human, CE_HIDE_HUNGER)
+
 	//The fucking TRAIT_FAT mutation is the dumbest shit ever. It makes the code so difficult to work with
 	if(HAS_TRAIT_FROM(human, TRAIT_FAT, OBESITY))//I share your pain, past coder.
 		if(human.overeatduration < (200 SECONDS))
-			to_chat(human, span_notice("You feel fit again!"))
+			if(show_feedback)
+				to_chat(human, span_notice("You feel fit again!"))
 			REMOVE_TRAIT(human, TRAIT_FAT, OBESITY)
 			human.remove_movespeed_modifier(/datum/movespeed_modifier/obesity)
 			human.update_worn_undersuit()
 			human.update_worn_oversuit()
 	else
 		if(human.overeatduration >= (200 SECONDS))
-			to_chat(human, span_danger("You suddenly feel blubbery!"))
+			if(show_feedback)
+				to_chat(human, span_danger("You suddenly feel blubbery!"))
 			ADD_TRAIT(human, TRAIT_FAT, OBESITY)
 			human.add_movespeed_modifier(/datum/movespeed_modifier/obesity)
 			human.update_worn_undersuit()
@@ -170,22 +182,35 @@
 
 	handle_hunger_slowdown(human)
 
-	// If we did anything more then just set and throw alerts here I would add bracketing
-	// But well, it is all we do, so there's not much point bothering with it you get me?
-	switch(nutrition)
-		if(NUTRITION_LEVEL_FULL to INFINITY)
-			human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/fat)
-		if(NUTRITION_LEVEL_HUNGRY to NUTRITION_LEVEL_FULL)
-			human.clear_alert(ALERT_NUTRITION)
-		if(NUTRITION_LEVEL_STARVING to NUTRITION_LEVEL_HUNGRY)
-			human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/hungry)
-		if(0 to NUTRITION_LEVEL_STARVING)
-			human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/starving)
+	if(show_feedback)
+		// If we did anything more then just set and throw alerts here I would add bracketing
+		// But well, it is all we do, so there's not much point bothering with it you get me?
+		switch(nutrition)
+			if(NUTRITION_LEVEL_FULL to INFINITY)
+				human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/fat)
+			if(NUTRITION_LEVEL_HUNGRY to NUTRITION_LEVEL_FULL)
+				human.clear_alert(ALERT_NUTRITION)
+			if(NUTRITION_LEVEL_STARVING to NUTRITION_LEVEL_HUNGRY)
+				human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/hungry)
+			if(0 to NUTRITION_LEVEL_STARVING)
+				human.throw_alert(ALERT_NUTRITION, /atom/movable/screen/alert/starving)
+
+		if(nutrition <= NUTRITION_LEVEL_STARVING)
+			human.apply_status_effect(/datum/status_effect/grouped/concussion, HUNGER_EFFECT)
+			if(COOLDOWN_FINISHED(human, mob_cooldowns["hunger_vomit"]) && DT_PROB(5, delta_time))
+				COOLDOWN_START(human, mob_cooldowns["hunger_vomit"], rand(40, 120) SECONDS)
+				human.vomit(0, FALSE, FALSE, 0, TRUE, VOMIT_TOXIC, FALSE, FALSE, 0)
+		else
+			human.remove_status_effect(/datum/status_effect/grouped/concussion, HUNGER_EFFECT)
+
+	else
+		human.clear_alert(ALERT_NUTRITION)
+		human.remove_status_effect(/datum/status_effect/grouped/concussion, HUNGER_EFFECT)
 
 ///for when mood is disabled and hunger should handle slowdowns
 /obj/item/organ/stomach/proc/handle_hunger_slowdown(mob/living/carbon/human/human)
 	var/hungry = (500 - human.nutrition) / 5 //So overeat would be 100 and default level would be 80
-	if(hungry >= 70)
+	if(!CHEM_EFFECT_MAGNITUDE(human, CE_HIDE_HUNGER) && (hungry >= 70))
 		human.add_or_update_variable_movespeed_modifier(/datum/movespeed_modifier/hunger, slowdown = (hungry / 50))
 	else
 		human.remove_movespeed_modifier(/datum/movespeed_modifier/hunger)
@@ -252,12 +277,6 @@
 				BP.heal_bones()
 		reagents.remove_reagent(milk.type, milk.metabolization_rate * delta_time)
 	return ..()
-
-/obj/item/organ/stomach/bone/plasmaman
-	name = "digestive crystal"
-	icon_state = "stomach-p"
-	desc = "A strange crystal that is responsible for metabolizing the unseen energy force that feeds plasmamen."
-	milk_burn_healing = 0
 
 /obj/item/organ/stomach/cybernetic
 	name = "basic cybernetic stomach"

@@ -10,15 +10,14 @@
 		/datum/employer/none
 	)
 
-	alt_titles = list("Mime")
+	alt_titles = list(JOB_CLOWN, "Mime")
 	outfits = list(
 		"Default" = list(
 			SPECIES_HUMAN = /datum/outfit/job/clown,
-			SPECIES_PLASMAMAN = /datum/outfit/job/clown/plasmaman,
 		),
+
 		"Mime" = list(
 			SPECIES_HUMAN = /datum/outfit/job/mime,
-			SPECIES_PLASMAMAN = /datum/outfit/job/mime/plasmaman,
 		),
 	)
 
@@ -52,7 +51,7 @@
 	name = "Clown"
 	jobtype = /datum/job/clown
 
-	id_trim = /datum/id_trim/job/clown
+	id_template = /datum/access_template/job/clown
 	uniform = /obj/item/clothing/under/rank/civilian/clown
 	backpack_contents = list(
 		/obj/item/stamp/clown = 1,
@@ -66,22 +65,11 @@
 	mask = /obj/item/clothing/mask/gas/clown_hat
 	l_pocket = /obj/item/bikehorn
 
-	backpack = /obj/item/storage/backpack/clown
-	satchel = /obj/item/storage/backpack/clown
-	duffelbag = /obj/item/storage/backpack/duffelbag/clown //strangely has a duffel
+	back = /obj/item/storage/backpack/clown
 
 	box = /obj/item/storage/box/hug/survival
 	chameleon_extras = /obj/item/stamp/clown
 	implants = list(/obj/item/implant/sad_trombone)
-
-/datum/outfit/job/clown/plasmaman
-	name = "Clown (Plasmaman)"
-
-	uniform = /obj/item/clothing/under/plasmaman/clown
-	gloves = /obj/item/clothing/gloves/color/plasmaman/clown
-	head = /obj/item/clothing/head/helmet/space/plasmaman/clown
-	mask = /obj/item/clothing/mask/gas/clown_hat/plasmaman
-	r_hand = /obj/item/tank/internals/plasmaman/belt/full
 
 /datum/outfit/job/clown/mod
 	name = "Clown (MODsuit)"
@@ -118,7 +106,7 @@
 	name = "Mime"
 	jobtype = /datum/job/clown
 
-	id_trim = /datum/id_trim/job/mime
+	id_template = /datum/access_template/job/mime
 	uniform = /obj/item/clothing/under/rank/civilian/mime
 	suit = /obj/item/clothing/suit/toggle/suspenders
 	backpack_contents = list(
@@ -133,19 +121,8 @@
 	mask = /obj/item/clothing/mask/gas/mime
 	shoes = /obj/item/clothing/shoes/laceup
 
-	backpack = /obj/item/storage/backpack/mime
-	satchel = /obj/item/storage/backpack/mime
-
+	back = /obj/item/storage/backpack/mime
 	chameleon_extras = /obj/item/stamp/mime
-
-/datum/outfit/job/mime/plasmaman
-	name = "Mime (Plasmaman)"
-
-	uniform = /obj/item/clothing/under/plasmaman/mime
-	gloves = /obj/item/clothing/gloves/color/plasmaman/white
-	head = /obj/item/clothing/head/helmet/space/plasmaman/mime
-	mask = /obj/item/clothing/mask/gas/mime/plasmaman
-	r_hand = /obj/item/tank/internals/plasmaman/belt/full
 
 /datum/outfit/job/mime/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
 	..()

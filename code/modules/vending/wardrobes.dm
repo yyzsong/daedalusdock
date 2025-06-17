@@ -64,7 +64,7 @@
 					/obj/item/clothing/shoes/sneakers/white = 4,
 					/obj/item/clothing/head/beret/medical/paramedic = 4,
 					/obj/item/clothing/head/soft/paramedic = 4,
-					/obj/item/clothing/shoes/sneakers/blue = 4,
+					/obj/item/clothing/shoes/really_blue_sneakers = 4,
 					/obj/item/clothing/suit/apron/surgical = 4,
 					/obj/item/clothing/mask/surgical = 4)
 	refill_canister = /obj/item/vending_refill/wardrobe/medi_wardrobe
@@ -103,7 +103,7 @@
 	payment_department = ACCOUNT_ENG
 	light_color = COLOR_VIVID_YELLOW
 
-	discount_access = ACCESS_ENGINE
+	discount_access = ACCESS_ENGINEERING
 /obj/item/vending_refill/wardrobe/engi_wardrobe
 	machine_name = "EngiDrobe"
 
@@ -465,7 +465,7 @@
 	refill_canister = /obj/item/vending_refill/wardrobe/chem_wardrobe
 	payment_department = ACCOUNT_MED
 
-	discount_access = ACCESS_CHEMISTRY
+	discount_access = ACCESS_PHARMACY
 
 /obj/item/vending_refill/wardrobe/chem_wardrobe
 	machine_name = "ChemDrobe"
@@ -513,7 +513,7 @@
 	refill_canister = /obj/item/vending_refill/wardrobe/viro_wardrobe
 	payment_department = ACCOUNT_MED
 
-	discount_access = ACCESS_VIROLOGY
+	discount_access = ACCESS_MEDICAL
 
 /obj/item/vending_refill/wardrobe/viro_wardrobe
 	machine_name = "ViroDrobe"

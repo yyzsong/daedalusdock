@@ -22,7 +22,6 @@
 	outfits = list(
 		"Default" = list(
 			SPECIES_HUMAN = /datum/outfit/job/ce,
-			SPECIES_PLASMAMAN = /datum/outfit/job/ce/plasmaman,
 		),
 	)
 
@@ -61,7 +60,7 @@
 	jobtype = /datum/job/chief_engineer
 
 	id = /obj/item/card/id/advanced/silver
-	id_trim = /datum/id_trim/job/chief_engineer
+	id_template = /datum/access_template/job/chief_engineer
 	uniform = /obj/item/clothing/under/rank/engineering/chief_engineer
 	backpack_contents = list(
 		/obj/item/assembly/flash/handheld
@@ -73,23 +72,12 @@
 	shoes = /obj/item/clothing/shoes/sneakers/brown
 	l_pocket = /obj/item/modular_computer/tablet/pda/heads/ce
 
-	backpack = /obj/item/storage/backpack/industrial
-	satchel = /obj/item/storage/backpack/satchel/eng
-	duffelbag = /obj/item/storage/backpack/duffelbag/engineering
+	back = /obj/item/storage/backpack/industrial
 
 	box = /obj/item/storage/box/survival/engineer
 	chameleon_extras = /obj/item/stamp/ce
 	skillchips = list(/obj/item/skillchip/job/engineer)
 	pda_slot = ITEM_SLOT_LPOCKET
-
-/datum/outfit/job/ce/plasmaman
-	name = "Chief Engineer Plasmaman"
-
-	uniform = /obj/item/clothing/under/plasmaman/chief_engineer
-	gloves = /obj/item/clothing/gloves/color/plasmaman/chief_engineer
-	head = /obj/item/clothing/head/helmet/space/plasmaman/chief_engineer
-	mask = /obj/item/clothing/mask/breath
-	r_hand = /obj/item/tank/internals/plasmaman/belt/full
 
 /datum/outfit/job/ce/mod
 	name = "Chief Engineer (MODsuit)"

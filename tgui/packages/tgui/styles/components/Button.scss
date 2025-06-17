@@ -33,15 +33,15 @@ $bg-map: colors.$bg-map !default;
       background-color 0ms;
   }
 
-  &:focus {
+  &:active {
     transition:
       color 100ms,
       background-color 100ms;
   }
 
   &:hover,
-  &:focus {
-    background-color: lighten($color, 30%);
+  &:active {
+    background-color: OLD_lighten($color, 30%);
     color: $text-color;
   }
 }
@@ -56,6 +56,8 @@ $bg-map: colors.$bg-map !default;
   outline: 0;
   border-radius: $border-radius;
   margin-bottom: base.em(2px);
+  cursor: base.$cursor-pointer;
+
   // Disable selection in buttons
   user-select: none;
   -ms-user-select: none;
@@ -139,6 +141,7 @@ $bg-map: colors.$bg-map !default;
 
 .Button--disabled {
   background-color: $color-disabled !important;
+  cursor: base.$cursor-default;
 }
 
 .Button--selected {
