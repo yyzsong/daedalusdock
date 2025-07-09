@@ -313,7 +313,7 @@
 					announcer.notify_citation(security_record.fields[DATACORE_NAME], t1, fine)
 				// for (var/obj/item/modular_computer/tablet in GLOB.TabletMessengers)
 				// 	if(tablet.saved_identification == R.fields[DATACORE_NAME])
-				// 		var/message = "You have been fined [fine] credits for '[t1]'. Fines may be paid at security."
+				// 		var/message = "You have been fined [fine] marks for '[t1]'. Fines may be paid at security."
 				// 		var/datum/signal/subspace/messaging/tablet_msg/signal = new(src, list(
 				// 			"name" = "Security Citation",
 				// 			"job" = "Citation Server",
@@ -382,7 +382,7 @@
 				var/counter = 1
 				while(security_record.fields["com_[counter]"])
 					counter++
-				security_record.fields["com_[counter]"] = "Made by [allowed_access] on [stationtime2text()] [time2text(world.realtime, "MMM DD")], [CURRENT_STATION_YEAR]<BR>[t1]"
+				security_record.fields["com_[counter]"] = "Made by [allowed_access] on [stationtime2text()] [time2text(world.realtime, "MMM DD")], '77<BR>[t1]"
 				to_chat(usr, span_notice("Successfully added comment."))
 				return
 
