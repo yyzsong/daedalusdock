@@ -44,7 +44,7 @@ TYPEINFO_DEF(/obj/item/restraints/handcuffs)
 	w_class = WEIGHT_CLASS_SMALL
 	throw_range = 5
 	breakouttime = 1 MINUTES
-	custom_price = PAYCHECK_HARD * 0.35
+	custom_price = PAYCHECK_ASSISTANT * 4
 
 	/// Time it takes to apply handcuffs.
 	var/handcuff_time = 3 SECONDS
@@ -262,8 +262,8 @@ TYPEINFO_DEF(/obj/item/restraints/handcuffs/cable/zipties)
 	icon_state = "cuff_used"
 	inhand_icon_state = "cuff"
 
-/obj/item/restraints/handcuffs/cable/zipties/used/attack()
-	return
+/obj/item/restraints/handcuffs/cable/zipties/used/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	return NONE
 
 /**
  * # Fake Zipties
@@ -501,7 +501,7 @@ TYPEINFO_DEF(/obj/item/restraints/handcuffs/cable/zipties)
 	hitsound = 'sound/weapons/taserhit.ogg'
 	w_class = WEIGHT_CLASS_SMALL
 	breakouttime = 6 SECONDS
-	custom_price = PAYCHECK_HARD * 0.35
+	custom_price = /obj/item/restraints/handcuffs::custom_price
 
 /obj/item/restraints/legcuffs/bola/energy/Initialize(mapload)
 	. = ..()

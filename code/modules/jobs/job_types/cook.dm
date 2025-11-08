@@ -3,9 +3,15 @@
 	description = "Serve food, cook meat, keep the crew fed."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
+
+	pinpad_key = "starvation"
+
+	starting_paycheck_amount = 4 // They get a healthy cash injection to start so they can buy produce.
+
 	total_positions = 2
 	spawn_positions = 1
 	exp_granted_type = EXP_TYPE_CREW
+
 	var/cooks = 0 //Counts cooks amount
 	/// List of areas that are counted as the kitchen for the purposes of CQC. Defaults to just the kitchen. Mapping configs can and should override this.
 	var/list/kitchen_areas = list(/area/station/service/kitchen)
@@ -32,6 +38,7 @@
 		),
 	)
 
+	mind_traits = list(TRAIT_CHEF)
 	liver_traits = list(TRAIT_CULINARY_METABOLISM)
 
 	departments_list = list(

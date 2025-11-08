@@ -8,6 +8,10 @@
  * * [/obj/item/proc/afterattack]. The return value does not matter.
  */
 /obj/item/proc/melee_attack_chain(mob/user, atom/target, params)
+	var/obj/item/used_item = get_attacking_item(user, target)
+	if(used_item != src)
+		return used_item.melee_attack_chain(user, target, params)
+
 	var/list/modifiers = params2list(params)
 	var/is_right_clicking = LAZYACCESS(modifiers, RIGHT_CLICK)
 
@@ -57,6 +61,10 @@
 
 /// Called when clicking on something outside of reach.
 /obj/item/proc/ranged_attack_chain(mob/user, atom/target, modifiers)
+	var/obj/item/used_item = get_attacking_item(user, target)
+	if(used_item != src)
+		return used_item.ranged_attack_chain(user, target, modifiers)
+
 	var/item_interact_result = target.base_ranged_item_interaction(user, src, modifiers)
 	if(item_interact_result & ITEM_INTERACT_SUCCESS)
 		return TRUE
@@ -195,16 +203,16 @@
 
 /// A helper for striking a mob with an item. Incurs click delay, stamina costs, and animates the attack.
 /mob/living/proc/attack_with_item(obj/item/attacking_item, mob/living/target, params)
-	if(!combat_mode)
-		return FALSE
+	// if(!combat_mode) This breaks too much, need more attackby refactors.
+	// 	return FALSE
 
 	if(attacking_item.force && HAS_TRAIT(src, TRAIT_PACIFISM))
 		to_chat(src, span_warning("You don't want to harm other living beings."))
 		return FALSE
 
-	do_attack_animation(target, attacking_item, do_hurt = FALSE)
-	changeNext_move(attacking_item.combat_click_delay)
-	stamina_swing(attacking_item.stamina_cost)
+	// do_attack_animation(target, attacking_item, do_hurt = FALSE)
+	// changeNext_move(attacking_item.combat_click_delay)
+	// stamina_swing(attacking_item.stamina_cost)
 
 	return attacking_item.attack(target, src, params)
 
@@ -228,6 +236,14 @@
 
 	if(item_flags & NOBLUDGEON)
 		return
+
+	if(!user.combat_mode)
+		return
+
+	if(!used_special)
+		user.do_attack_animation(M, src, do_hurt = FALSE)
+		user.changeNext_move(combat_click_delay)
+		user.stamina_swing(stamina_cost)
 
 	M.lastattacker = user.real_name
 	M.lastattackerckey = user.ckey

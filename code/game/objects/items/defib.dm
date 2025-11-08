@@ -320,6 +320,8 @@ TYPEINFO_DEF(/obj/item/defibrillator)
 	lefthand_file = 'icons/mob/inhands/equipment/medical_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/medical_righthand.dmi'
 
+	has_combat_mode_interaction = TRUE
+
 	force = 0
 	force_wielded = 8
 	throwforce = 6
@@ -435,53 +437,59 @@ TYPEINFO_DEF(/obj/item/defibrillator)
 	forceMove(defib)
 	defib.update_power()
 
-/obj/item/shockpaddles/attack(mob/M, mob/living/user, params)
+/obj/item/shockpaddles/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	if(!isliving(interacting_with))
+		return NONE
+
 	if(busy)
-		return
+		return ITEM_INTERACT_BLOCKING
+
 	defib?.update_power()
 	if(req_defib && !defib.powered)
-		user.visible_message(span_warning("[defib] beeps: Not enough charge!"))
+		user.visible_message(span_warning("[defib] beeps: Not enough charge."))
 		playsound(src, 'sound/machines/defib_failed.ogg', 50, FALSE)
-		return
+		return ITEM_INTERACT_BLOCKING
+
 	if(!wielded)
 		if(iscyborg(user))
 			to_chat(user, span_warning("You must activate the paddles in your active module before you can use them on someone!"))
 		else
 			to_chat(user, span_warning("You need to wield the paddles in both hands before you can use them on someone!"))
-		return
+		return ITEM_INTERACT_BLOCKING
+
 	if(cooldown)
 		if(req_defib)
 			to_chat(user, span_warning("[defib] is recharging!"))
 		else
 			to_chat(user, span_warning("[src] are recharging!"))
-		return
+		return ITEM_INTERACT_BLOCKING
 
-	var/list/modifiers = params2list(params)
 	if(LAZYACCESS(modifiers, RIGHT_CLICK))
-		do_disarm(M, user)
-		return
+		do_disarm(interacting_with, user)
+		return ITEM_INTERACT_SUCCESS
 
-	if(!iscarbon(M))
+	if(!iscarbon(interacting_with))
 		if(req_defib)
 			to_chat(user, span_warning("The instructions on [defib] don't mention how to revive that..."))
 		else
 			to_chat(user, span_warning("You aren't sure how to revive that..."))
-		return
-	var/mob/living/carbon/H = M
+		return ITEM_INTERACT_BLOCKING
 
+	var/mob/living/carbon/carbon_target = interacting_with
 	if(user.zone_selected != BODY_ZONE_CHEST)
-		to_chat(user, span_warning("You need to target your patient's chest with [src]!"))
-		return
+		to_chat(user, span_warning("You need to target your patient's chest with [src]."))
+		return ITEM_INTERACT_BLOCKING
 
 	if(user.combat_mode)
-		do_harm(H, user)
-		return
+		do_harm(carbon_target, user)
+		return ITEM_INTERACT_SUCCESS
 
-	if(H.stat != DEAD)
-		H.notify_ghost_revival("Your heart is being defibrillated!")
-		H.grab_ghost() // Shove them back in their body.
+	if(carbon_target.stat != DEAD)
+		carbon_target.notify_ghost_revival("Your heart is being defibrillated.")
+		carbon_target.grab_ghost() // Shove them back in their body.
 
-	do_help(H, user)
+	do_help(carbon_target, user)
+	return ITEM_INTERACT_SUCCESS
 
 /// Called whenever the paddles successfuly shock something
 /obj/item/shockpaddles/proc/do_success()
@@ -580,6 +588,12 @@ TYPEINFO_DEF(/obj/item/defibrillator)
 	user.visible_message(span_notice("[user] places [src] on [H]'s chest."), span_warning("You place [src] on [H]'s chest."))
 	playsound(src, 'sound/machines/defib_charge.ogg', 75, FALSE)
 
+	// Cinematic effect.
+	if((H.stat == UNCONSCIOUS) && H.client)
+		var/sound/patient_sound = sound('sound/machines/defib_charge.ogg', volume = 50)
+		patient_sound.environment = SOUND_ENVIRONMENT_UNDERWATER
+		SEND_SOUND(H, patient_sound)
+
 	// Check to see if the patient's chest is covered or we don't care.
 	if((!combat && !req_defib) || (req_defib && !defib.combat))
 		for(var/obj/item/clothing/C in H.get_equipped_items())
@@ -616,6 +630,16 @@ TYPEINFO_DEF(/obj/item/defibrillator)
 	do_success() //Deduct charge
 	H.Knockdown(15 SECONDS)
 
+	// Cinematic effect.
+	if(H.stat == UNCONSCIOUS && H.client)
+		var/sound/patient_sound = sound('sound/machines/defib_zap.ogg', volume = 50)
+		patient_sound.environment = SOUND_ENVIRONMENT_UNDERWATER
+		SEND_SOUND(H, patient_sound)
+
+		if(H.client?.prefs?.read_preference(/datum/preference/toggle/darkened_flash) == FALSE)
+			H.overlay_fullscreen("defib_flash", /atom/movable/screen/fullscreen/flash/over_blind)
+			addtimer(CALLBACK(H, TYPE_PROC_REF(/mob, clear_fullscreen), "defib_flash", 1.5 SECONDS), 1 SECOND)
+
 	// Braindead
 	if(H.stat == DEAD)
 		shock_pulling(30, H)
@@ -637,7 +661,7 @@ TYPEINFO_DEF(/obj/item/defibrillator)
 	inhand_icon_state = "defibpaddles0"
 	req_defib = FALSE
 
-/obj/item/shockpaddles/cyborg/attack(mob/M, mob/user)
+/obj/item/shockpaddles/cyborg/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
 	if(iscyborg(user))
 		var/mob/living/silicon/robot/R = user
 		if(R.emagged)

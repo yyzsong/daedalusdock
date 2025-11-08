@@ -3,12 +3,31 @@
 	desc = "A stick of chalk."
 	icon = 'icons/obj/items/chalk.dmi'
 	icon_state = "chalk"
+	var/list/reagent_contents = list(/datum/reagent/calcium = 5, /datum/reagent/carbon = 3) //its calcium carbonite or something, I never took chemistry
 
 	var/obj/effect/aether_rune/rune_path = /obj/effect/aether_rune/exchange
+
+/obj/item/chalk/Initialize(mapload)
+	. = ..()
+	register_item_context()
+	AddComponent(/datum/component/edible,\
+			initial_reagents = reagent_contents,\
+			foodtypes = NONE,\
+			volume = 7,\
+			tastes = list("the front of class" = 5, "a hint of mysticism" = 1, "chalk" = 7))
+
+/obj/item/chalk/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	if(isturf(target))
+		context[SCREENTIP_CONTEXT_LMB] = "Draw sigil"
+		return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/chalk/attack_self(mob/user, modifiers)
 	. = ..()
 	if(.)
+		return
+
+	if(!HAS_MIND_TRAIT(user, TRAIT_AETHERITE))
+		to_chat(user, span_warning("You are not sure what to do with this."))
 		return
 
 	var/list/options = list()
@@ -26,6 +45,10 @@
 /obj/item/chalk/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
 	if(!isopenturf(interacting_with))
 		return NONE
+
+	if(!HAS_MIND_TRAIT(user, TRAIT_AETHERITE))
+		to_chat(user, span_warning("You are not sure what to do with this."))
+		return ITEM_INTERACT_BLOCKING
 
 	var/turf/T = interacting_with
 	for(var/turf/nearby_turf as anything in (RANGE_TURFS(1, interacting_with) - interacting_with))

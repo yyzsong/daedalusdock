@@ -39,7 +39,7 @@ GLOBAL_LIST_INIT(adventure_loot_generator_index,generate_generator_index())
 /// Unlocks special cargo crates
 /datum/adventure_loot_generator/cargo
 	id = "trade_contract"
-	var/static/list/unlockable_packs = list(/datum/supply_pack/exploration/scrapyard,/datum/supply_pack/exploration/catering,/datum/supply_pack/exploration/shrubbery)
+	var/static/list/unlockable_packs = list()
 
 /datum/adventure_loot_generator/cargo/generate()
 	var/list/still_locked_packs = list()
@@ -153,11 +153,6 @@ GLOBAL_LIST_INIT(adventure_loot_generator_index,generate_generator_index())
 /obj/item/firelance/Initialize(mapload)
 	. = ..()
 	cell = new /obj/item/stock_parts/cell(src)
-
-/obj/item/firelance/attack(mob/living/M, mob/living/user, params, datum/special_attack/used_special)
-	if(!user.combat_mode)
-		return
-	. = ..()
 
 /obj/item/firelance/get_cell()
 	return cell

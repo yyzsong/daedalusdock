@@ -104,7 +104,11 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	/// Experience type granted by playing in this job.
 	var/exp_granted_type = ""
 
-	var/paycheck = PAYCHECK_MINIMAL
+	///How many paychecks should players start out the round with?
+	var/starting_paycheck_amount = 1
+	/// How much someone is paid every pay period (~45 minutes)
+	var/paycheck = PAYCHECK_ASSISTANT * 5
+	/// The department the paycheck comes from. They don't get one at all if null.
 	var/paycheck_department = null
 
 	/// Traits added to the mind of the mob assigned this job.
@@ -170,16 +174,22 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	/// Default security status. Skipped if null.
 	var/default_security_status = null
 
+	/// Pinpad key for their doors, if any.
+	var/pinpad_key = null
 
 /datum/job/New()
 	. = ..()
-	//PARIAH ADDITION START
+
 	if(!job_spawn_title)
 		job_spawn_title = title
-	//PARIAH ADDITION END
+
+	if(pinpad_key)
+		SSid_access.get_static_pincode(pinpad_key, 5)
+
 	var/list/jobs_changes = get_map_changes()
 	if(!jobs_changes)
 		return
+
 	if(isnum(jobs_changes["spawn_positions"]))
 		spawn_positions = jobs_changes["spawn_positions"]
 	if(isnum(jobs_changes["total_positions"]))
@@ -231,6 +241,11 @@ GLOBAL_LIST_INIT(job_display_order, list(
 		for(var/i in roundstart_experience)
 			experiencer.mind.adjust_experience(i, roundstart_experience[i], TRUE)
 
+	if(pinpad_key)
+		var/pin = SSid_access.get_static_pincode(pinpad_key)
+		spawned.mind.set_note(NOTES_DOOR_CODES, "The pin to your doors is [pin]")
+		to_chat(player_client, span_obviousnotice("You remember the pin to your doors: <b>[pin]</b>"))
+
 /datum/job/proc/announce_job(mob/living/joining_mob)
 	if(head_announce)
 		announce_head(joining_mob, head_announce)
@@ -251,10 +266,10 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	dress_up_as_job(equipping, FALSE, used_pref, TRUE)
 	var/obj/item/storage/wallet/W = wear_id
 	if(istype(W))
-		var/monero = round(equipping.paycheck, 10)
+		var/monero = round(equipping.paycheck * equipping.starting_paycheck_amount, 10)
 		SSeconomy.spawn_ones_for_amount(monero, W)
 	else
-		bank_account.payday()
+		bank_account.payday(equipping.starting_paycheck_amount)
 
 /mob/living/proc/dress_up_as_job(datum/job/equipping, visual_only = FALSE)
 	return

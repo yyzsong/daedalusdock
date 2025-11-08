@@ -1071,8 +1071,8 @@ DEFINE_INTERACTABLE(/obj/item)
  *The default action is attack_self().
  *Checks before we get to here are: mob is alive, mob is not restrained, stunned, asleep, resting, laying, item is on the mob.
  */
-/obj/item/proc/ui_action_click(mob/user, actiontype)
-	if(SEND_SIGNAL(src, COMSIG_ITEM_UI_ACTION_CLICK, user, actiontype) & COMPONENT_ACTION_HANDLED)
+/obj/item/proc/ui_action_click(mob/user, datum/action/item_action/used_action)
+	if(SEND_SIGNAL(src, COMSIG_ITEM_UI_ACTION_CLICK, user, used_action) & COMPONENT_ACTION_HANDLED)
 		return
 
 	attack_self(user)
@@ -1732,7 +1732,16 @@ DEFINE_INTERACTABLE(/obj/item)
 
 // Update icons if this is being carried by a mob
 /obj/item/wash(clean_types)
+	var/was_bloody = !!blood_DNA_length()
 	. = ..()
+
+	var/datum/component/hidden_blood/hidden_blood = GetComponent(/datum/component/hidden_blood)
+	if(clean_types & CLEAN_TYPE_HIDDEN_BLOOD)
+		if(hidden_blood)
+			qdel(hidden_blood)
+
+	else if(!hidden_blood && was_bloody && !blood_DNA_length()) // Blood was removed
+		AddComponent(/datum/component/hidden_blood)
 
 	if(equipped_to)
 		if(equipped_to.is_holding(src))
@@ -2028,3 +2037,7 @@ DEFINE_INTERACTABLE(/obj/item)
 	if(!isnull(loc))
 		SEND_SIGNAL(loc, COMSIG_ATOM_CONTENTS_WEIGHT_CLASS_CHANGED, src, old_w_class, new_w_class)
 	return TRUE
+
+/// Called by the attack chain, returns the item to use for attacking. CAN NOT RETURN NULL.
+/obj/item/proc/get_attacking_item(mob/living/user, atom/target) as /obj/item
+	return src
